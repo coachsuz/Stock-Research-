@@ -1,0 +1,7 @@
+research.db
+research.db-shm
+research.db-wal
+logs/
+__pycache__/
+*.pyc
+.env
