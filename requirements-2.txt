@@ -1,0 +1,8 @@
+streamlit
+pandas
+yfinance
+anthropic
+requests
+plotly
+psycopg2-binary
+supabase
