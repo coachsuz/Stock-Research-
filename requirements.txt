@@ -3,6 +3,6 @@ pandas
 yfinance
 anthropic
 requests
-plotly
+plotly>=5.0.0
 psycopg2-binary
 supabase
