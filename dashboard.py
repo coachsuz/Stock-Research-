@@ -9,7 +9,7 @@ Refresh data by running: python scheduler.py --now
 """
 
 import json
-import sqlite3
+import db_adapter as sqlite3
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
@@ -454,7 +454,7 @@ elif page == "🔔 Alerts":
 elif page == "📅 Earnings calendar":
     st.title("Earnings calendar")
 
-    import sqlite3 as _sq
+    import db_adapter as _sq
     conn = _sq.connect("research.db")
     df = pd.read_sql_query("""
         SELECT e.ticker, e.next_earnings, e.days_until, e.last_earnings,
@@ -494,7 +494,7 @@ elif page == "📅 Earnings calendar":
 elif page == "⚡ Action engine":
     st.title("Action engine")
 
-    import sqlite3 as _sq, sys, os
+    import db_adapter as _sq, sys, os
     sys.path.insert(0, os.getcwd())
 
     try:
@@ -605,7 +605,7 @@ elif page == "⚡ Action engine":
 elif page == "📋 Thesis scorecard":
     st.title("Thesis scorecard")
 
-    import sqlite3 as _sq, json as _json
+    import db_adapter as _sq, json as _json
     conn = _sq.connect("research.db")
 
     checkins = pd.read_sql_query("""
@@ -660,7 +660,7 @@ elif page == "📋 Thesis scorecard":
 elif page == "📈 Hit rate analyzer":
     st.title("Signal hit rate analyzer")
 
-    import sqlite3 as _sq
+    import db_adapter as _sq
     conn = _sq.connect("research.db")
 
     total = conn.execute("SELECT COUNT(*) FROM signal_outcomes").fetchone()[0]
@@ -724,7 +724,7 @@ elif page == "📈 Hit rate analyzer":
 elif page == "💰 Valuation model":
     st.title("Valuation model")
 
-    import sqlite3 as _sq
+    import db_adapter as _sq
     conn = _sq.connect("research.db")
 
     try:
@@ -809,7 +809,7 @@ elif page == "💰 Valuation model":
 elif page == "⚡ Relative strength":
     st.title("Relative strength vs S&P 500")
 
-    import sqlite3 as _sq
+    import db_adapter as _sq
     conn = _sq.connect("research.db")
 
     try:
@@ -890,7 +890,7 @@ elif page == "⚡ Relative strength":
 elif page == "💼 My portfolio":
     st.title("My portfolio")
 
-    import sqlite3 as _sq, sys, os
+    import db_adapter as _sq, sys, os
     sys.path.insert(0, os.getcwd())
 
     try:
@@ -1178,7 +1178,7 @@ elif page == "🔬 Quality checks":
     st.title("Quality checks — margin trends & analyst consensus")
     st.caption("Catches the DLO problem: growth at declining margins and high analyst disagreement.")
 
-    import sqlite3 as _sq
+    import db_adapter as _sq
     conn = _sq.connect("research.db")
 
     try:
@@ -1267,7 +1267,7 @@ elif page == "🎙 Earnings analysis":
     st.title("Earnings call analysis")
     st.caption("Claude reads the transcript so you don't have to.")
 
-    import sqlite3 as _sq, json as _json
+    import db_adapter as _sq, json as _json
     conn = _sq.connect("research.db")
 
     try:

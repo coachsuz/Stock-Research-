@@ -11,7 +11,7 @@ Usage:
     python3 portfolio.py --override ANET hold "Waiting for Q2 earnings"
 """
 
-import sqlite3
+import db_adapter as sqlite3
 import yfinance as yf
 import argparse
 from datetime import datetime, timedelta

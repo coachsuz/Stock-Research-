@@ -15,7 +15,7 @@ Add to your existing portfolio:
     python3 my_portfolio.py                             # show full report
 """
 
-import sqlite3
+import db_adapter as sqlite3
 import yfinance as yf
 import argparse
 import time
