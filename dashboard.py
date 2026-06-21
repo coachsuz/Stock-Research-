@@ -62,34 +62,56 @@ def load_watchlist():
 @st.cache_data(ttl=300)
 def load_cluster_buys(period=None, min_funds=2):
     conn = sqlite3.connect(DB_PATH)
-    params = {"min_funds": min_funds, "period": period}
-    df = pd.read_sql_query("""
-        SELECT ticker,
-               COUNT(DISTINCT fund_cik) AS fund_count,
-               GROUP_CONCAT(fund_name, ' · ') AS funds,
-               SUM(market_value) / 1e6 AS total_value_m,
-               period
-        FROM filings_13f
-        WHERE is_new = 1
-          AND (:period IS NULL OR period = :period)
-        GROUP BY ticker, period
-        HAVING fund_count >= :min_funds
-        ORDER BY fund_count DESC, total_value_m DESC
-    """, conn, params=params)
+    is_postgres = hasattr(conn, "_conn")  # our adapter wraps postgres conns
+
+    concat_fn = "STRING_AGG(fund_name, ' · ')" if is_postgres else "GROUP_CONCAT(fund_name, ' · ')"
+
+    if period:
+        query = f"""
+            SELECT ticker,
+                   COUNT(DISTINCT fund_cik) AS fund_count,
+                   {concat_fn} AS funds,
+                   SUM(market_value) / 1e6 AS total_value_m,
+                   period
+            FROM filings_13f
+            WHERE is_new = 1 AND period = ?
+            GROUP BY ticker, period
+            HAVING COUNT(DISTINCT fund_cik) >= ?
+            ORDER BY fund_count DESC, total_value_m DESC
+        """
+        params = [period, min_funds]
+    else:
+        query = f"""
+            SELECT ticker,
+                   COUNT(DISTINCT fund_cik) AS fund_count,
+                   {concat_fn} AS funds,
+                   SUM(market_value) / 1e6 AS total_value_m,
+                   period
+            FROM filings_13f
+            WHERE is_new = 1
+            GROUP BY ticker, period
+            HAVING COUNT(DISTINCT fund_cik) >= ?
+            ORDER BY fund_count DESC, total_value_m DESC
+        """
+        params = [min_funds]
+
+    df = pd.read_sql_query(query, conn, params=params)
     conn.close()
     return df
 
 @st.cache_data(ttl=300)
 def load_insider_buys(days=90):
+    from datetime import datetime, timedelta
+    cutoff_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
     conn = sqlite3.connect(DB_PATH)
     df = pd.read_sql_query("""
         SELECT ticker, filer_name, filer_title, transaction_date,
                shares, price, value / 1e6 AS value_m
         FROM insider_transactions
         WHERE (transaction_type LIKE '%Purchase%' OR transaction_type LIKE '%Buy%' OR shares > 0)
-          AND transaction_date >= date('now', ?)
+          AND transaction_date >= ?
         ORDER BY value_m DESC
-    """, conn, params=[f"-{days} days"])
+    """, conn, params=[cutoff_date])
     conn.close()
     return df
 
@@ -126,12 +148,14 @@ def load_ai_summary(ticker, summary_type):
 
 @st.cache_data(ttl=300)
 def load_price_history(ticker, days=365):
+    from datetime import datetime, timedelta
+    cutoff_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
     conn = sqlite3.connect(DB_PATH)
     df = pd.read_sql_query("""
         SELECT date, close FROM price_history
-        WHERE ticker = ? AND date >= date('now', ?)
+        WHERE ticker = ? AND date >= ?
         ORDER BY date ASC
-    """, conn, params=[ticker, f"-{days} days"])
+    """, conn, params=[ticker, cutoff_date])
     conn.close()
     return df
 
