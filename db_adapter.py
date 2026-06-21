@@ -23,8 +23,32 @@ if USE_POSTGRES:
 
 
 def _translate_query(query: str) -> str:
-    """Convert SQLite '?' placeholders to Postgres '%s'."""
-    return query.replace("?", "%s")
+    """
+    Convert SQLite syntax to Postgres-compatible syntax:
+    - '?' placeholders to '%s' (but escape literal '%' first, e.g. in LIKE clauses)
+    - 'INTEGER PRIMARY KEY AUTOINCREMENT' to 'SERIAL PRIMARY KEY'
+    - bare 'AUTOINCREMENT' removed (Postgres doesn't use it)
+    """
+    if not USE_POSTGRES:
+        return query
+
+    # Escape literal % first (e.g. LIKE '%Purchase%') so psycopg2 doesn't
+    # misinterpret them as format specifiers when substituting %s params.
+    query = query.replace("%", "%%")
+
+    # Now safely convert '?' placeholders to '%s'
+    query = query.replace("?", "%s")
+
+    # SQLite -> Postgres schema syntax differences
+    query = re.sub(
+        r"INTEGER\s+PRIMARY\s+KEY\s+AUTOINCREMENT",
+        "SERIAL PRIMARY KEY",
+        query,
+        flags=re.IGNORECASE,
+    )
+    query = re.sub(r"\bAUTOINCREMENT\b", "", query, flags=re.IGNORECASE)
+
+    return query
 
 
 class _CursorWrapper:
