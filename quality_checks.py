@@ -14,7 +14,7 @@ Usage:
     python3 quality_checks.py --ticker DLO       # single stock
 """
 
-import sqlite3
+import db_adapter as sqlite3
 import yfinance as yf
 import time
 import json

@@ -19,7 +19,7 @@ Usage:
     python3 scorecard.py --report                 # full report
 """
 
-import sqlite3
+import db_adapter as sqlite3
 import argparse
 import json
 import yfinance as yf

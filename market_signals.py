@@ -11,7 +11,7 @@ Usage:
     python3 market_signals.py
 """
 
-import sqlite3
+import db_adapter as sqlite3
 import yfinance as yf
 import pandas as pd
 import time

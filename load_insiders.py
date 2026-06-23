@@ -1,5 +1,6 @@
 
-import sqlite3, yfinance as yf, time
+import db_adapter as sqlite3
+import yfinance as yf, time
 from datetime import datetime
 
 conn = sqlite3.connect('research.db')

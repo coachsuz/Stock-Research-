@@ -19,7 +19,7 @@ import requests
 import pandas as pd
 import json
 import time
-import sqlite3
+import db_adapter as sqlite3
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
 

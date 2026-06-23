@@ -3,7 +3,7 @@ Stock Research Pipeline — First Run Setup
 Run this once after any database reset to initialize all tables.
 python3 setup.py
 """
-import sqlite3
+import db_adapter as sqlite3
 
 DB_PATH = "research.db"
 

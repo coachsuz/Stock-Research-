@@ -18,7 +18,7 @@ Usage:
     python3 valuation.py --ticker ANET      # single stock deep dive
 """
 
-import sqlite3
+import db_adapter as sqlite3
 import yfinance as yf
 import pandas as pd
 import json

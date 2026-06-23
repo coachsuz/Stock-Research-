@@ -28,7 +28,7 @@ Usage:
 import os
 import json
 import time
-import sqlite3
+import db_adapter as sqlite3
 import requests
 import anthropic
 from datetime import datetime
@@ -241,18 +241,8 @@ def fetch_from_motley_fool(ticker: str, year: int = None, quarter: int = None) -
     # Try known working URLs first (build from search results we already know)
     known_urls = {
         ("ANET", 1, 2026): "https://www.fool.com/earnings/call-transcripts/2026/05/05/arista-anet-q1-2026-earnings-transcript/",
-        ("MNST", 1, 2026): "https://www.fool.com/earnings/call-transcripts/2026/05/08/monster-mnst-q1-2026-earnings-transcript/",
-        ("AMD",  1, 2026): "https://www.fool.com/earnings/call-transcripts/2026/05/06/amd-amd-q1-2026-earnings-call-transcript/",
-        ("AVGO", 1, 2026): "https://www.fool.com/earnings/call-transcripts/2026/03/04/broadcom-avgo-q1-2026-earnings-call-transcript/",
-        ("NEE",  1, 2026): "https://www.fool.com/earnings/call-transcripts/2026/04/23/nextera-energy-nee-q1-2026-earnings-transcript/",
-        ("NVDA", 1, 2027): "https://www.fool.com/earnings/call-transcripts/2026/05/20/nvidia-nvda-q1-2027-earnings-transcript/",
-        ("PLTR", 1, 2026): "https://www.fool.com/earnings/call-transcripts/2026/05/04/palantir-pltr-q1-2026-earnings-transcript/",
-        ("GOOGL",1, 2026): "https://www.fool.com/earnings/call-transcripts/2026/04/29/alphabet-googl-q1-2026-earnings-call-transcript/",
-        ("TXN",  1, 2026): "https://www.fool.com/earnings/call-transcripts/2026/04/22/txn-q1-2026-earnings-transcript/",
-        ("KLAC", 1, 2026): "https://www.fool.com/earnings/call-transcripts/2025/10/30/kla-klac-q1-2026-earnings-call-transcript/",
-        ("LRCX", 3, 2026): "https://www.fool.com/earnings/call-transcripts/2026/04/22/lam-research-lrcx-q3-2026-earnings-transcript/",
-        ("MU",   1, 2026): "https://www.fool.com/earnings/call-transcripts/2025/12/17/micron-mu-q1-2026-earnings-call-transcript/",
-        ("TSLA", 1, 2026): "https://www.fool.com/earnings/call-transcripts/2026/04/22/tesla-tsla-q1-2026-earnings-call-transcript/",
+        ("MNST", 1, 2026): "https://www.fool.com/earnings/call-transcripts/2026/05/08/monster-beverage-mnst-q1-2026-earnings-call-trans/",
+        ("NVDA", 1, 2026): "https://www.fool.com/earnings/call-transcripts/2026/05/28/nvidia-nvda-q1-2026-earnings-call-transcript/",
     }
 
     direct_url = known_urls.get((ticker.upper(), q, yr))
@@ -740,14 +730,11 @@ def auto_run_transcripts():
     print(f"  Portfolio: {portfolio_tickers}")
     print(f"  Recent earners: {recent_earners}")
 
-    # Get most recent completed quarter
+    # Get current quarter
     from datetime import datetime
     now = datetime.now()
-    quarter = (now.month - 1) // 3  # current minus 1 = most recent completed
+    quarter = (now.month - 1) // 3 + 1
     year    = now.year
-    if quarter == 0:  # January = Q4 of prior year
-        quarter = 4
-        year -= 1
 
     # Check which already have analysis this quarter
     conn = sqlite3.connect(DB_PATH)
@@ -768,6 +755,7 @@ def auto_run_transcripts():
 
     for ticker in sorted(to_analyze):
         print(f"\n{ticker}:")
+        time.sleep(5)  # Rate limit protection between stocks
         data = fetch_transcript(ticker, year=year, quarter=quarter)
 
         # Try previous quarter if current not found
